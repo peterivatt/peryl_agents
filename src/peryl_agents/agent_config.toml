@@ -1,0 +1,11 @@
+[profiles.high]
+model = "gpt-6-astra"
+effort = "high"
+
+[profiles.medium]
+model = "gpt-6-sol"
+effort = "medium"
+
+[profiles.low]
+model = "gpt-6-luna"
+effort = "low"
