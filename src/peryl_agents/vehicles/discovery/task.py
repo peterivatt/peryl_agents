@@ -4,12 +4,13 @@ import tempfile
 import json
 
 from pathlib import Path
-from peryl_agents.vehicles.discovery.reader import get_existing_vehicles
 from sqlalchemy.orm import Session
 from peryl_db.engine import engine
+from peryl_db.models.vehicles import Vehicle
 from peryl_agents.config import PROFILE_MEDIUM
-from peryl_agents.vehicles.discovery.validator import VehicleDiscoveryBatch
-from peryl_agents.vehicles.discovery.writer import save_vehicle_batch
+from peryl_agents.batch_class import DataBatch
+from peryl_agents.vehicles.discovery.validators import VehicleDiscovery
+from peryl_agents.utils import get_existing_records, save_batch
 
 
 TASK_NAME = "vehicle research"
@@ -23,7 +24,7 @@ def run_task():
         raise FileNotFoundError(f"Task: {TASK_NAME} missing task prompt file.")
 
     with Session(engine) as session:
-        vehicles = get_existing_vehicles(session)
+        vehicles = get_existing_records(session, Vehicle)
 
         vehicle_context = "\n".join(f"{vehicle.make}, "
                                     f"{vehicle.model}, "
@@ -42,7 +43,7 @@ def run_task():
         {vehicle_context}
         """
 
-        schema = VehicleDiscoveryBatch.model_json_schema()
+        schema = DataBatch[VehicleDiscovery].model_json_schema()
 
         with tempfile.TemporaryDirectory() as temp_dir:
             schema_path = Path(temp_dir) / "schema.json"
@@ -66,5 +67,5 @@ def run_task():
                 print(exc.stderr, file=sys.stderr)
                 raise
 
-        batch = VehicleDiscoveryBatch.model_validate_json(result.stdout)
-        save_vehicle_batch(session, batch)
+        batch = DataBatch[VehicleDiscovery].model_validate_json(result.stdout)
+        save_batch(session, batch, Vehicle)
