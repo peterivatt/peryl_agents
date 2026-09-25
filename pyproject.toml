@@ -16,6 +16,12 @@ dependencies = [
     "sqlalchemy>=2.0.54",
 ]
 
+[dependency-groups]
+dev = ["pytest"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
 [tool.uv.sources]
 peryl_db = { path = "../peryl_db", editable = true }
 
