@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 
 from peryl_db.base import Base
 from peryl_agents.batch_class import DataBatch
+from pathlib import Path
 
 
 DBModel = TypeVar("DBModel", bound=Base)
@@ -45,3 +46,13 @@ def save_batch(session: Session,
         session.refresh(record)
 
     return records
+
+def get_task_prompt(path:Path, task_name:str):
+    prompt_path = path / "task_prompt.md"
+    if prompt_path.exists():
+        with open(prompt_path, "r") as f:
+            task_prompt = f.read()
+    else:
+        raise FileNotFoundError(f"Task: {task_name} missing task prompt file.")
+
+    return task_prompt
